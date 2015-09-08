@@ -23,28 +23,51 @@ CHROMIUM_PATH := external/chromium_org
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := webview
-LOCAL_SRC_FILES := prebuilt/webview.apk
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_SUFFIX := $(COMMON_ANDROID_PACKAGE_SUFFIX)
 LOCAL_MODULE_CLASS := APPS
 LOCAL_CERTIFICATE := PRESIGNED
 
-ifeq ($(TARGET_IS_64_BIT),true)
-TARGET_ARCH_ABI := arm64-v8a
-TARGET_LIB_DIR := lib64
-TARGET_LIB_ARM_DIR := arm64
+ifeq ($(TARGET_ARCH),arm64)
+        LOCAL_SRC_FILES := prebuilt/arm64/webview.apk
+
+        # Primary arch
+        $(shell mkdir -p $(TARGET_OUT_SHARED_LIBRARIES))
+        $(shell cp $(LOCAL_PATH)/prebuilt/arm64/lib/arm64-v8a/libwebviewchromium.so $(TARGET_OUT_SHARED_LIBRARIES))
+
+        $(shell mkdir -p $(TARGET_OUT_APPS)/webview/lib/arm64)
+        $(shell ln -sf ../../../../lib64/libwebviewchromium.so $(TARGET_OUT_APPS)/webview/lib/arm64/libwebviewchromium.so)
+        ALL_DEFAULT_INSTALLED_MODULES += $(TARGET_OUT_APPS)/webview/lib/arm64/libwebviewchromium.so
+
+        # Secondary arch
+        $(shell mkdir -p $($(TARGET_2ND_ARCH_VAR_PREFIX)TARGET_OUT_SHARED_LIBRARIES))
+        $(shell cp $(LOCAL_PATH)/prebuilt/arm64/lib/armeabi-v7a/libwebviewchromium.so $($(TARGET_2ND_ARCH_VAR_PREFIX)TARGET_OUT_SHARED_LIBRARIES))
+
+        $(shell mkdir -p $(TARGET_OUT_APPS)/webview/lib/arm)
+        $(shell ln -sf ../../../../lib/libwebviewchromium.so $(TARGET_OUT_APPS)/webview/lib/arm/libwebviewchromium.so)
+        ALL_DEFAULT_INSTALLED_MODULES += $(TARGET_OUT_APPS)/webview/lib/arm/libwebviewchromium.so
+else ifeq ($(TARGET_ARCH),arm)
+        LOCAL_SRC_FILES := prebuilt/arm/webview.apk
+
+        $(shell mkdir -p $(TARGET_OUT_SHARED_LIBRARIES))
+        $(shell cp $(LOCAL_PATH)/prebuilt/arm/lib/armeabi-v7a/libwebviewchromium.so $(TARGET_OUT_SHARED_LIBRARIES))
+
+        $(shell mkdir -p $(TARGET_OUT_APPS)/webview/lib/arm)
+        $(shell ln -sf ../../../../lib/libwebviewchromium.so $(TARGET_OUT_APPS)/webview/lib/arm/libwebviewchromium.so)
+        ALL_DEFAULT_INSTALLED_MODULES += $(TARGET_OUT_APPS)/webview/lib/arm/libwebviewchromium.so
+else ifeq ($(TARGET_ARCH),x86)
+        LOCAL_SRC_FILES := prebuilt/x86/webview.apk
+
+        $(shell mkdir -p $(TARGET_OUT_SHARED_LIBRARIES))
+        $(shell cp $(LOCAL_PATH)/prebuilt/x86/lib/x86/libwebviewchromium.so $(TARGET_OUT_SHARED_LIBRARIES))
+
+        $(shell mkdir -p $(TARGET_OUT_APPS)/webview/lib/x86)
+        $(shell ln -sf ../../../../lib/libwebviewchromium.so $(TARGET_OUT_APPS)/webview/lib/x86/libwebviewchromium.so)
+        ALL_DEFAULT_INSTALLED_MODULES += $(TARGET_OUT_APPS)/webview/lib/x86/libwebviewchromium.so
 else
-TARGET_ARCH_ABI := armeabi-v7a
-TARGET_LIB_DIR := lib
-TARGET_LIB_ARM_DIR := arm
+        # Huh? You MIPS, bro?
+        $(error Prebuilt WebView: unsupported architecture - $(TARGET_ARCH))
 endif
-
-$(shell mkdir -p $(TARGET_OUT_SHARED_LIBRARIES))
-$(shell cp $(LOCAL_PATH)/prebuilt/$(TARGET_ARCH_ABI)/libwebviewchromium.so $(TARGET_OUT_SHARED_LIBRARIES))
-
-$(shell mkdir -p $(TARGET_OUT_APPS)/webview/lib/$(TARGET_LIB_ARM_DIR))
-$(shell ln -sf ../../../../$(TARGET_LIB_DIR)/libwebviewchromium.so $(TARGET_OUT_APPS)/webview/lib/$(TARGET_LIB_ARM_DIR)/libwebviewchromium.so)
-ALL_DEFAULT_INSTALLED_MODULES += $(TARGET_OUT_APPS)/webview/lib/$(TARGET_LIB_ARM_DIR)/libwebviewchromium.so
 
 include $(BUILD_PREBUILT)
 

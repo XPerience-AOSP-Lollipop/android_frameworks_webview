@@ -5,9 +5,9 @@ What's this, dawg?
 ------------------
 This repository replaces android_framework_webview to use Google's prebuilt WebView.
 
-You can update the included webview binaries yourself by using chromium/prebuilt/extract.sh.
+You can update the included webview binaries yourself by using chromium/prebuilt/ARCH/extract.sh.
 
-Current version included in this repository is noted at chromium/prebuilt/VERSION.
+Current version included in this repository is noted at chromium/prebuilt/ARCH/VERSION.
 
 You must set those on build/target/product/core_minimal.mk to use this repository:
 ```
@@ -31,6 +31,4 @@ Cons
 ```
  - We're now forced to use Google's prebuilt library, no local changes allowed.
    (But realistically who mods libwebviewchromium?)
- - Support is limited to arm/arm64 only for now.
-   (Blame Google.)
 ```
